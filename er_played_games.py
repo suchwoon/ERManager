@@ -32,6 +32,17 @@ with sync_playwright() as p:
         print(f"\n[{idx}/{len(nicknames)}] {nickname} 처리 시작 (총 {season_count - 1}개 시즌 검색)")
         
         for season_idx, season in enumerate(seasons, 1):
+            # season_label 계산
+            if season == "NORMAL":
+                season_label = season
+            else:
+                season_num = int(season.split('_')[1])
+                raw_label = season_num - 9
+                if raw_label <= 0:
+                    season_label = f"EA{season_num}"
+                else:
+                    season_label = f"S{raw_label}"
+                    
             try:
                 url = f"https://dak.gg/er/players/{nickname}?season={season}"
                 page.goto(url, timeout=50000)
@@ -40,17 +51,6 @@ with sync_playwright() as p:
                 # 실험체 행 동적 검색
                 row_xpath = f"//div[@class='character-name' and text()='{subject_input}']/ancestor::tr"
                 row = page.locator(row_xpath)
-                
-                # season_label 계산
-                if season == "NORMAL":
-                    season_label = season
-                else:
-                    season_num = int(season.split('_')[1])
-                    raw_label = season_num - 9
-                    if raw_label <= 0:
-                        season_label = f"EA{season_num}"
-                    else:
-                        season_label = f"S{raw_label}"
                 
                 if not row.count():
                     print(f"  ⚠️ [{season_idx}/{season_count}] {season_label}: 기록 없음")
